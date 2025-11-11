@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Influencer Connect MVP</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="dashboard-header">
+    <div class="header-content">
+      <div class="header-left">
+        <div class="logo-container">
+          <h1 onclick="showHomeView()" style="cursor: pointer;">Influencer Connect</h1>
+          <div class="logo-nav-buttons">
+            <button class="logo-nav-btn" onclick="showHomeView()" id="nav-discover-btn">Discover</button>
+            <button class="logo-nav-btn" onclick="showOffersView()" id="nav-offers-btn">Offers</button>
+            <button class="logo-nav-btn hidden" id="nav-my-offers-btn" onclick="showMyOffersView()">My Offers</button>
+          </div>
+        </div>
+        <p class="tagline">AI-powered influencer discovery platform</p>
+      </div>
+      <nav class="header-nav">
+        <a href="#" onclick="showHomeView(); return false;" class="nav-link" id="nav-link-discover">Discover</a>
+        <a href="#" onclick="showOffersView(); return false;" class="nav-link" id="nav-link-offers">Offers</a>
+        <a href="#" id="nav-my-offers" class="nav-link hidden" onclick="showMyOffersView(); return false;">My Offers</a>
+      </nav>
+      <div class="header-right">
+        <div id="credits-display" class="credits-display hidden">
+          <span class="credits-icon">🪙</span>
+          <span class="credits-text">
+            <span id="credits-balance">0</span> Credits
+          </span>
+          <button class="btn-buy-credits" onclick="showBuyCreditsModal()">Buy Credits</button>
+        </div>
+        <button id="login-btn" class="btn-login" onclick="showLoginModal()">Login</button>
+        <button id="user-menu-btn" class="btn-user hidden" onclick="toggleUserMenu()">
+          <span id="user-name">User</span> ▼
+        </button>
+        <div id="user-menu" class="user-menu hidden">
+          <a href="#" onclick="showAnalyticsDashboard(); return false;">Analytics Dashboard</a>
+          <a href="#" onclick="showCampaigns(); return false;">My Campaigns</a>
+          <a href="#" onclick="showMyOffersView(); toggleUserMenu(); return false;">📋 My Offers</a>
+          <a href="#" onclick="showBuyCreditsModal(); toggleUserMenu(); return false;">💳 Buy Credits</a>
+          <a href="#" onclick="logout(); return false;">Logout</a>
+        </div>
+      </div>
+    </div>
+  </header>
+  
+  <main class="container">
+    <!-- Offers Section -->
+    <section id="offers-section" class="hidden">
+      <div class="offers-header">
+        <div class="offers-header-content">
+          <h2>💰 Offers Marketplace</h2>
+          <p>Discover paid collaboration opportunities with brands. Browse offers, apply with one click, and get paid for your content. Businesses can post offers and find the perfect creators.</p>
+        </div>
+        <div class="offers-actions">
+          <button class="btn-primary" onclick="showCreateOfferModal()" id="btn-create-offer">+ Post an Offer</button>
+          <button class="btn-secondary" onclick="showBrowseOffersView()">Browse All Offers</button>
+        </div>
+      </div>
+      
+      <!-- Offer Filters -->
+      <div class="offers-filters">
+        <input type="text" id="offer-search" placeholder="Search offers: e.g., 'London coffee shops, Instagram Stories, £50-£150'" class="offer-search-input">
+        <select id="offer-filter-platform" class="offer-filter">
+          <option value="">All Platforms</option>
+          <option value="instagram">Instagram</option>
+          <option value="tiktok">TikTok</option>
+          <option value="youtube">YouTube</option>
+        </select>
+        <select id="offer-filter-location" class="offer-filter">
+          <option value="">All Locations</option>
+        </select>
+        <select id="offer-filter-budget" class="offer-filter">
+          <option value="">All Budgets</option>
+          <option value="0-50">£0 - £50</option>
+          <option value="50-150">£50 - £150</option>
+          <option value="150-500">£150 - £500</option>
+          <option value="500+">£500+</option>
+        </select>
+        <select id="offer-filter-type" class="offer-filter">
+          <option value="">All Types</option>
+          <option value="cash">Cash Only</option>
+          <option value="in-kind">In-Kind Only</option>
+          <option value="both">Cash + In-Kind</option>
+        </select>
+      </div>
+      
+      <!-- Offers List -->
+      <div id="offers-list" class="offers-list">
+        <!-- Offers will be rendered here -->
+      </div>
+      
+      <!-- Empty State -->
+      <div id="offers-empty" class="offers-empty hidden">
+        <p>No offers found. Try adjusting your filters or <a href="#" onclick="showCreateOfferModal()">create the first offer</a>!</p>
+      </div>
+    </section>
+    
+    <!-- My Offers Section (Business Dashboard) -->
+    <section id="my-offers-section" class="hidden">
+      <div class="my-offers-header">
+        <h2>My Offers</h2>
+        <button class="btn-primary" onclick="showCreateOfferModal()">+ Create New Offer</button>
+      </div>
+      <div id="my-offers-list" class="my-offers-list">
+        <!-- Business offers will be rendered here -->
+      </div>
+    </section>
+    
+    <!-- Hero Section (shown when no results) -->
+    <section id="hero-section" class="hero-section">
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1 class="hero-title">
+            Find the Perfect Influencers 
+            <span class="gradient-text">in Seconds</span>
+          </h1>
+          <p class="hero-description">
+            AI-powered discovery with authenticity scores and fraud detection. 
+            Just describe what you need—we'll find creators who truly fit.
+          </p>
+          <div class="hero-buttons">
+            <button class="btn-primary" onclick="document.getElementById('prompt-input').focus()">
+              <span>🔍</span> Start Searching
+            </button>
+            <button class="btn-secondary">Watch Demo</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Cards (shown when no results) -->
+    <div id="stats-section" class="stats-section">
+      <div class="stats-card">
+        <div class="stats-icon">👥</div>
+        <div class="stats-content">
+          <div class="stats-value" id="stats-creators">40</div>
+          <div class="stats-label">Active Creators</div>
+          <div class="stats-change">+23% this month</div>
+        </div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-icon">📈</div>
+        <div class="stats-content">
+          <div class="stats-value" id="stats-engagement">6.2%</div>
+          <div class="stats-label">Avg. Engagement</div>
+          <div class="stats-change">+0.8% vs industry</div>
+        </div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-icon">✅</div>
+        <div class="stats-content">
+          <div class="stats-value" id="stats-verified">40</div>
+          <div class="stats-label">Verified Profiles</div>
+          <div class="stats-change">94% authenticity score</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onboarding/Help Section -->
+    <section id="onboarding-section" class="onboarding-section hidden">
+      <div class="onboarding-card">
+        <button class="onboarding-close" onclick="closeOnboarding()">&times;</button>
+        <h3>🎯 How It Works</h3>
+        <ol>
+          <li><strong>Search:</strong> Describe what you need in natural language</li>
+          <li><strong>Filter:</strong> Use filters to refine results by platform, location, or followers</li>
+          <li><strong>Shortlist:</strong> Save your favorite creators</li>
+          <li><strong>Outreach:</strong> Generate personalized messages and connect</li>
+        </ol>
+        <p class="onboarding-tip">
+          💡 <strong>Tip:</strong> Try "London fitness creators with 10k-50k followers"
+        </p>
+      </div>
+    </section>
+
+    <!-- Search Section -->
+    <section class="search-section" id="main-search-section">
+      <div class="search-header">
+        <h2>Describe Your Perfect Creator</h2>
+        <p>Use natural language to find influencers that match your exact needs</p>
+        <button class="help-btn" onclick="toggleOnboarding()" title="Show help">?</button>
+      </div>
+      <div id="credits-notice" class="credits-notice hidden">
+        <span class="credits-notice-icon">🪙</span>
+        <span class="credits-notice-text">
+          <strong>Credits Required:</strong> Each search costs <strong>1 credit</strong>. 
+          <a href="#" onclick="showBuyCreditsModal(); return false;">Buy credits</a> to continue searching.
+        </span>
+      </div>
+      <div class="prompt-input-wrapper">
+        <input
+          type="text"
+          id="prompt-input"
+          placeholder="e.g., Fashion micro-influencers in NYC, Tech YouTubers with 100k+ subs"
+        />
+        <button id="search-btn">Search</button>
+      </div>
+      <div class="example-prompts">
+        <p class="examples-label">Try these example prompts:</p>
+        <div class="prompt-tags">
+          <span class="prompt-tag" data-prompt="female beauty Instagram">Beauty creators</span>
+          <span class="prompt-tag" data-prompt="male fitness YouTube">Fitness YouTubers</span>
+          <span class="prompt-tag" data-prompt="comedy TikTok">Comedy TikTok</span>
+          <span class="prompt-tag" data-prompt="tech reviews">Tech reviewers</span>
+          <span class="prompt-tag" data-prompt="travel micro-influencers">Travel micro</span>
+          <span class="prompt-tag" data-prompt="food London">Food London</span>
+          <span class="prompt-tag" data-prompt="wellness meditation">Wellness</span>
+          <span class="prompt-tag" data-prompt="fashion Tokyo">Fashion Tokyo</span>
+          <span class="prompt-tag" data-prompt="gaming 25-30">Gaming 25-30</span>
+          <span class="prompt-tag" data-prompt="lifestyle New York">Lifestyle NYC</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recent Searches (shown when no results) -->
+    <section id="recent-searches" class="recent-searches">
+      <h3>Recent Searches</h3>
+      <div class="recent-searches-list" id="recent-searches-list">
+        <!-- Will be populated by JavaScript -->
+      </div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="results-section" class="results-section hidden">
+      <div class="results-header">
+        <div class="results-info">
+          <h2 id="results-title">Results</h2>
+          <p id="results-subtitle">Ranked by relevance and authenticity score</p>
+        </div>
+        <div class="results-actions">
+          <button id="shortlist-btn" class="btn-shortlist hidden">
+            View Shortlist (<span id="shortlist-count">0</span>)
+          </button>
+          <button class="btn-filter-toggle" onclick="toggleFilters()">
+            <span>🔽</span> Filters
+          </button>
+        </div>
+      </div>
+      
+      <!-- Filter Controls -->
+      <div id="filters-panel" class="filters-panel hidden">
+        <div class="filters-grid">
+          <div class="filter-group">
+            <label for="filter-platform">Platform</label>
+            <select id="filter-platform" class="filter-select">
+              <option value="">All Platforms</option>
+              <option value="tiktok">TikTok</option>
+              <option value="instagram">Instagram</option>
+              <option value="youtube">YouTube</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filter-location">Location</label>
+            <select id="filter-location" class="filter-select">
+              <option value="">All Locations</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filter-category">Category</label>
+            <select id="filter-category" class="filter-select">
+              <option value="">All Categories</option>
+              <option value="beauty">Beauty</option>
+              <option value="fitness">Fitness</option>
+              <option value="fashion">Fashion</option>
+              <option value="food">Food</option>
+              <option value="travel">Travel</option>
+              <option value="gaming">Gaming</option>
+              <option value="tech">Tech</option>
+              <option value="lifestyle">Lifestyle</option>
+              <option value="comedy">Comedy</option>
+              <option value="wellness">Wellness</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filter-followers-min">Min Followers</label>
+            <input type="number" id="filter-followers-min" class="filter-input" placeholder="0" min="0">
+          </div>
+          <div class="filter-group">
+            <label for="filter-followers-max">Max Followers</label>
+            <input type="number" id="filter-followers-max" class="filter-input" placeholder="1000000" min="0">
+          </div>
+          <div class="filter-group">
+            <label for="filter-age-min">Min Age</label>
+            <input type="number" id="filter-age-min" class="filter-input" placeholder="18" min="18" max="100">
+          </div>
+          <div class="filter-group">
+            <label for="filter-age-max">Max Age</label>
+            <input type="number" id="filter-age-max" class="filter-input" placeholder="50" min="18" max="100">
+          </div>
+          <div class="filter-group">
+            <label for="filter-gender">Gender</label>
+            <select id="filter-gender" class="filter-select">
+              <option value="">All</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+        </div>
+        <div class="filters-actions">
+          <button class="btn-filter-apply" onclick="applyFilters()">Apply Filters</button>
+          <button class="btn-filter-clear" onclick="clearFilters()">Clear All</button>
+        </div>
+      </div>
+      
+      <div id="results-container" class="results-container"></div>
+    </section>
+
+    <!-- Analytics Dashboard Section -->
+    <section id="analytics-section" class="analytics-section hidden">
+      <div class="analytics-header">
+        <h2>Analytics Dashboard</h2>
+        <button class="btn-close" onclick="closeAnalytics()">&times;</button>
+      </div>
+      <div id="analytics-content" class="analytics-content">
+        <!-- Will be populated by JavaScript -->
+      </div>
+    </section>
+  </main>
+  
+  <!-- Modal for influencer profile details -->
+  <div id="profile-modal" class="modal hidden">
+    <div class="modal-content">
+      <span class="modal-close">&times;</span>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <div id="login-modal" class="modal hidden">
+    <div class="modal-content modal-small">
+      <span class="modal-close" onclick="closeLoginModal()">&times;</span>
+      <div class="login-content">
+        <h2>Login to Influencer Connect</h2>
+        <div class="login-options">
+          <button class="btn-login-option" onclick="loginAsBrand()">
+            <span>🏢</span> Login as Brand
+          </button>
+          <button class="btn-login-option" onclick="loginAsInfluencer()">
+            <span>👤</span> Login as Influencer
+          </button>
+        </div>
+        <div class="login-divider">
+          <span>or</span>
+        </div>
+        <div class="oauth-buttons">
+          <button class="btn-oauth" onclick="oauthLogin('google')">
+            <span>🔵</span> Continue with Google
+          </button>
+          <button class="btn-oauth" onclick="oauthLogin('instagram')">
+            <span>📷</span> Connect Instagram
+          </button>
+        </div>
+        <p class="login-note">Demo mode: Click any button to login</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Outreach Modal -->
+  <div id="outreach-modal" class="modal hidden">
+    <div class="modal-content modal-medium">
+      <span class="modal-close" onclick="closeOutreachModal()">&times;</span>
+      <div class="outreach-content">
+        <h2>Generate Outreach Message</h2>
+        <div class="outreach-form">
+          <div class="form-group">
+            <label>Your Brand/Company Name</label>
+            <input type="text" id="outreach-brand" placeholder="Your Brand Name" value="Your Brand">
+          </div>
+          <div class="form-group">
+            <label>Campaign Description</label>
+            <textarea id="outreach-campaign" placeholder="Describe your campaign or collaboration opportunity..." rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Budget Range (Optional)</label>
+            <input type="text" id="outreach-budget" placeholder="e.g., $500-$1000">
+          </div>
+          <button class="btn-generate" onclick="generateOutreachMessage()">Generate Message</button>
+        </div>
+        <div id="outreach-message" class="outreach-message hidden">
+          <h3>Your Outreach Message:</h3>
+          <div class="message-content" id="message-content"></div>
+          <div class="message-actions">
+            <button class="btn-copy" onclick="copyOutreachMessage()">📋 Copy Message</button>
+            <button class="btn-email" onclick="openEmailClient()">📧 Open Email</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div id="payment-modal" class="modal hidden">
+    <div class="modal-content modal-medium">
+      <span class="modal-close" onclick="closePaymentModal()">&times;</span>
+      <div class="payment-content">
+        <h2>Create Campaign Contract</h2>
+        <div class="payment-form">
+          <div class="form-group">
+            <label>Influencer</label>
+            <input type="text" id="payment-influencer" readonly>
+          </div>
+          <div class="form-group">
+            <label>Campaign Amount</label>
+            <input type="number" id="payment-amount" placeholder="500" min="0" step="10">
+          </div>
+          <div class="form-group">
+            <label>Campaign Details</label>
+            <textarea id="payment-details" placeholder="Campaign requirements and deliverables..." rows="4"></textarea>
+          </div>
+          <div class="payment-summary">
+            <div class="summary-row">
+              <span>Platform Fee (5%)</span>
+              <span id="platform-fee">$0</span>
+            </div>
+            <div class="summary-row total">
+              <span>Total Amount</span>
+              <span id="total-amount">$0</span>
+            </div>
+          </div>
+          <button class="btn-pay" onclick="processPayment()">💳 Proceed to Payment</button>
+          <p class="payment-note">🔒 Secure payment powered by Stripe (Demo Mode)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Buy Credits Modal -->
+  <div id="buy-credits-modal" class="modal hidden">
+    <div class="modal-content modal-medium">
+      <span class="modal-close" onclick="closeBuyCreditsModal()">&times;</span>
+      <div class="buy-credits-content">
+        <h2>🪙 Buy Credits</h2>
+        <p class="credits-info">Credits are used to search for influencers. Each search costs 1 credit.</p>
+        <div class="credits-packages">
+          <div class="credits-package" data-credits="10" data-price="9.99">
+            <div class="package-header">
+              <h3>Starter</h3>
+              <div class="package-price">$9.99</div>
+            </div>
+            <div class="package-credits">10 Credits</div>
+            <div class="package-description">Perfect for small campaigns</div>
+            <div class="package-value">$1.00 per search</div>
+            <button class="btn-select-package" onclick="selectCreditPackage(10, 9.99)">Select</button>
+          </div>
+          <div class="credits-package recommended" data-credits="50" data-price="39.99">
+            <div class="package-badge">Most Popular</div>
+            <div class="package-header">
+              <h3>Professional</h3>
+              <div class="package-price">$39.99</div>
+            </div>
+            <div class="package-credits">50 Credits</div>
+            <div class="package-description">Best value for regular use</div>
+            <div class="package-value">$0.80 per search</div>
+            <button class="btn-select-package" onclick="selectCreditPackage(50, 39.99)">Select</button>
+          </div>
+          <div class="credits-package" data-credits="100" data-price="69.99">
+            <div class="package-header">
+              <h3>Enterprise</h3>
+              <div class="package-price">$69.99</div>
+            </div>
+            <div class="package-credits">100 Credits</div>
+            <div class="package-description">For large-scale campaigns</div>
+            <div class="package-value">$0.70 per search</div>
+            <button class="btn-select-package" onclick="selectCreditPackage(100, 69.99)">Select</button>
+          </div>
+        </div>
+        <div id="credit-payment-summary" class="credit-payment-summary hidden">
+          <h3>Purchase Summary</h3>
+          <div class="summary-row">
+            <span>Credits</span>
+            <span id="selected-credits">0</span>
+          </div>
+          <div class="summary-row">
+            <span>Amount</span>
+            <span id="selected-price">$0.00</span>
+          </div>
+          <div class="summary-row total">
+            <span>Total</span>
+            <span id="selected-total">$0.00</span>
+          </div>
+          <button class="btn-pay" onclick="processCreditPayment()">💳 Proceed to Payment</button>
+          <p class="payment-note">🔒 Secure payment powered by Stripe (Demo Mode)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pre-registration Sidebar Widget (Always Visible) -->
+  <div id="prereg-widget" class="prereg-widget" aria-hidden="false">
+    <button class="prereg-widget-toggle" id="prereg-widget-toggle" onclick="togglePreRegWidget()" aria-label="Toggle waitlist signup">
+      <span class="prereg-widget-icon">📧</span>
+      <span class="prereg-widget-label">Join Waitlist</span>
+    </button>
+    
+    <div id="prereg-widget-content" class="prereg-widget-content hidden">
+      <button class="prereg-widget-close" id="prereg-widget-close" onclick="togglePreRegWidget()" aria-label="Close">×</button>
+      <h3 id="prereg-title">Get early access</h3>
+      <p id="prereg-desc">Be first to try Influencer-Connect. Join the waitlist and we'll notify you when the beta opens.</p>
+
+      <form id="prereg-form" novalidate>
+        <label>Email <span class="req">*</span>
+          <input type="email" id="prereg-email" name="email" required placeholder="you@company.com" autocomplete="email" />
+          <small class="err" id="err-email" aria-live="polite"></small>
+        </label>
+
+        <label>Name
+          <input type="text" id="prereg-name" name="name" placeholder="Jane Doe" autocomplete="name" />
+        </label>
+
+        <label>Company
+          <input type="text" id="prereg-company" name="company" placeholder="Acme Co." autocomplete="organization" />
+        </label>
+
+        <label>Role
+          <select id="prereg-role" name="role">
+            <option value="">Select a role (optional)</option>
+            <option>Marketing Manager</option>
+            <option>Head of Social</option>
+            <option>Agency Owner</option>
+            <option>Creator / Talent Manager</option>
+            <option>Other</option>
+          </select>
+        </label>
+
+        <label class="consent">
+          <input type="checkbox" id="prereg-consent" name="consent" />
+          I agree to be contacted about early access and product updates. <span class="req">*</span>
+        </label>
+        <small class="err" id="err-consent" aria-live="polite"></small>
+
+        <button type="submit" id="prereg-submit">Join waitlist</button>
+      </form>
+
+      <div id="prereg-success" class="hidden success">
+        <h3>You're on the list ✅</h3>
+        <p>Thanks! We'll email you as soon as the beta opens. In the meantime, feel free to keep exploring.</p>
+        <button id="prereg-done" onclick="togglePreRegWidget()">Close</button>
+      </div>
+
+      <!-- Optional: Netlify/Formspree stubs
+      <form name="prereg" data-netlify="true" netlify-honeypot="bot-field" hidden>
+        <input type="email" name="email" />
+        <input type="text" name="name" />
+        <input type="text" name="company" />
+        <input type="text" name="role" />
+      </form>
+      -->
+    </div>
+  </div>
+
+  <!-- Create Offer Modal -->
+  <div id="create-offer-modal" class="modal hidden">
+    <div class="modal-content modal-large">
+      <span class="modal-close" onclick="closeCreateOfferModal()">&times;</span>
+      <h2>Create New Offer</h2>
+      <form id="create-offer-form" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Offer Title <span class="req">*</span></label>
+            <input type="text" id="offer-title" required placeholder="e.g., 3-story IG shoutout for new flat-white">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Location <span class="req">*</span></label>
+            <input type="text" id="offer-location" required placeholder="e.g., Shoreditch, London">
+          </div>
+          <div class="form-group">
+            <label>Radius (km) <span class="req">*</span></label>
+            <input type="number" id="offer-radius" required min="1" max="100" value="5" placeholder="5">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Platforms <span class="req">*</span></label>
+            <div class="checkbox-group">
+              <label><input type="checkbox" name="platform" value="instagram"> Instagram</label>
+              <label><input type="checkbox" name="platform" value="tiktok"> TikTok</label>
+              <label><input type="checkbox" name="platform" value="youtube"> YouTube</label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Deliverables <span class="req">*</span></label>
+            <textarea id="offer-deliverables" required rows="3" placeholder="e.g., 1x IG Reel + 2x Stories within 7 days. Tag @BeanLabCoffee, use #BeanLabShoreditch"></textarea>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Timeline (days) <span class="req">*</span></label>
+            <input type="number" id="offer-timeline" required min="1" max="90" value="7" placeholder="7">
+          </div>
+          <div class="form-group">
+            <label>Budget Type <span class="req">*</span></label>
+            <select id="offer-budget-type" required>
+              <option value="cash">Cash Only</option>
+              <option value="in-kind">In-Kind Only</option>
+              <option value="both">Cash + In-Kind</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-row" id="offer-cash-row">
+          <div class="form-group">
+            <label>Cash Budget (£) <span class="req">*</span></label>
+            <input type="number" id="offer-budget-cash" min="0" step="0.01" placeholder="60">
+          </div>
+        </div>
+        
+        <div class="form-row" id="offer-inkind-row" style="display: none;">
+          <div class="form-group">
+            <label>In-Kind Description</label>
+            <input type="text" id="offer-inkind" placeholder="e.g., Free drink + pastry">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Usage Rights</label>
+            <textarea id="offer-usage" rows="2" placeholder="e.g., Organic repost on our socials (30 days)"></textarea>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Required Hashtags</label>
+            <input type="text" id="offer-hashtags" placeholder="e.g., #BeanLabShoreditch #CoffeeTime">
+          </div>
+          <div class="form-group">
+            <label>UTM Code / Coupon</label>
+            <input type="text" id="offer-utm" placeholder="e.g., BEANLAB20">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Target Creator Criteria</label>
+            <textarea id="offer-criteria" rows="2" placeholder="e.g., London food/coffee creators, 5k-50k followers, ER > 2%"></textarea>
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" onclick="closeCreateOfferModal()">Cancel</button>
+          <button type="submit" class="btn-primary">Create Offer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Offer Details Modal -->
+  <div id="offer-details-modal" class="modal hidden">
+    <div class="modal-content modal-large">
+      <span class="modal-close" onclick="closeOfferDetailsModal()">&times;</span>
+      <div id="offer-details-content">
+        <!-- Offer details will be rendered here -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- Application Modal -->
+  <div id="application-modal" class="modal hidden">
+    <div class="modal-content modal-medium">
+      <span class="modal-close" onclick="closeApplicationModal()">&times;</span>
+      <h2>Apply to Offer</h2>
+      <div id="application-content">
+        <!-- Application form will be rendered here -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- Submission Modal -->
+  <div id="submission-modal" class="modal hidden">
+    <div class="modal-content modal-large">
+      <span class="modal-close" onclick="closeSubmissionModal()">&times;</span>
+      <div id="submission-content">
+        <!-- Submission form will be rendered here -->
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <a href="#" id="export-csv" class="hidden">Export prereg CSV</a>
+  </footer>
+  
+  <script src="app.js"></script>
+</body>
+</html>
